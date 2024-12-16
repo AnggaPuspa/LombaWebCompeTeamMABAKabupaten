@@ -23,25 +23,27 @@ class OtpController extends Controller
         
     }
 
-    public function verifyOtp(Request $request)
-    {
-        $request->validate([
-            'otp' => 'required|numeric',
-        ]);
+   public function verifyOtp(Request $request)
+{
+    $request->validate([
+        'otp' => 'required|numeric',
+    ]);
 
-        $user = Auth::user();
+    $user = Auth::user();
 
-        if ($user->otp === $request->otp && Carbon::now()->lessThanOrEqualTo($user->otp_expires_at)) {
-            $user->email_verified_at = Carbon::now();
-            $user->otp = null;
-            $user->otp_expires_at = null;
-            $user->save();
+    if ($user->otp === $request->otp && Carbon::now()->lessThanOrEqualTo($user->otp_expires_at)) {
+        $user->email_verified_at = Carbon::now();
+        $user->otp = null;
+        $user->otp_expires_at = null;
+        $user->save();
 
-            return redirect('/home')->with('message', 'Email berhasil diverifikasi.');
-        }
+        Auth::logout(); 
 
-        return back()->withErrors(['otp' => 'OTP tidak valid atau telah kedaluwarsa.']);
+        return redirect('/login')->with('message', 'Email berhasil diverifikasi. Silakan login.');
     }
+
+    return back()->withErrors(['otp' => 'OTP tidak valid atau telah kedaluwarsa.']);
+}
 
     
 }
